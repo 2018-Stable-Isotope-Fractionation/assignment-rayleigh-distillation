@@ -1,0 +1,134 @@
+---
+title: "Rayleigh distillation - example of numerical and analytical solution"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output:
+  html_document: 
+    df_print: paged
+    toc: yes
+    toc_float: true
+    code_folding: show
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r "setup", warning=FALSE, message=FALSE}
+# make sure to install this package for solving ordinary differential equations
+library(deSolve) 
+library(tidyverse)
+library(tibble)
+```
+
+# Define the system
+
+To solve an ODE system, one needs to define a function that represents the differential equations. Here we are considering the irreversible reaction $A \rightarrow B$ in a closed system and are keeping track of our light ($L$) and heavy ($H$) isotope pool in both the starting reactant reservoir ($A$) and product pool $B$. As discussed in class this could, this could also be employed to describe an equilibrium reaction where the product is lost (e.g. cloud condensation and precipitation).
+
+Assuming some constants $k_H$ and $k_L$ that describe the different reaction rates for the heavy and light isotope (and define the fractionation factor $\alpha$ of the system), the four variable pools ($L$ and $H$ isotopes in both $A$ and $B$) can be described how:
+
+## Derivatives function
+
+```{r}
+calc_derivs <- function(t, y, parms) {
+  with (c(as.list(y), parms), {
+    
+    dAH <- 
+    dBH <- 
+    
+    dAL <- 
+    dBL <- 
+    
+    # make sure to return in the same order as initial values
+    return(list(c(dAL, dAH, dBL, dBH)))
+  })
+}
+```
+
+## Variables
+
+```{r}
+# define time sequence (how many time steps to run)
+# the meaning of time depends on the value of the rate constants (if rate constants are large,
+# small time steps will lead to big changes of the system and vice versa)
+times <- seq(0, 100, by = 0.1)
+
+# define starting values of the system
+# these are also arbitrary isotope ratios, 
+# change the values to see what happens
+variables_initial <- c(
+  L_A = ,
+  H_A = ,
+  L_B = ,
+  H_B = 
+)
+variables_initial
+```
+
+## Parameters
+
+```{r}
+# define additional parameters for this system
+# here I'm showing how one could use multiple scenarios to explore
+# the consequences of parameter changes (using the tribble funtion
+# to define a data frame row by row)
+parameters <- 
+  tribble(
+    # scenario name, alpha (heavy over light rates ratio), light reaction rate
+    ~scenario,    ~alpha_HoL, ~k_L,
+    "Enrichment", 1.005,      0.1,
+    "Depletion",  0.995,      0.1
+  ) %>% 
+  # derived parameters
+  mutate(
+    k_H = k_L * alpha_HoL
+  )
+parameters
+```
+
+# Solve the model
+
+```{r, warning=FALSE}
+# solve the model for each parameter set
+out <-
+  parameters %>% 
+  # group by scenario
+  group_by(scenario) %>% 
+  # do the calculation for each parameter set
+  do({
+    ode(
+      y = variables_initial, 
+      times = times, 
+      func = calc_derivs, 
+      parms = as.list(.)) %>% 
+      as.data.frame()
+  })
+
+# see what ode solver returns
+out
+```
+
+# Evaluation
+
+```{r}
+# merge parameters into the results
+
+# calculate ratios, deltas and mass fractions
+
+# calculate expected values from theoretical considerations
+
+# calculate the approximate delta values from theoretical considerations
+
+```
+
+# Plotting
+
+Compare the different ratios and alphas.
+
+ - How does the numerical simlulation compare with the analytical solution?
+
+ - How do the delta approximation equations compare with the exact result from the numerial simulation? How might this change with stronger isotope fractionation?
+
+ - The fractionation factors are only about 5 permil (either towards depleting or enriching the product). What do you notice about the range of isotope values for the starting reservoir and accumulated product?
+
+```{r}
+
+```
+
