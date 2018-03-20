@@ -33,13 +33,14 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 .Rproj.user
-~$*
 
 # output files
 *.html
 *.pdf
 *.docx
-output*
 
-# solutions
-*solutions.R*
+# include documentation
+!/docs/*
+
+# always exclude any solutions files or folders
+*solution*
